@@ -2,7 +2,7 @@
 - name: Setup Debian host for Ansible
   hosts: all
   vars:
-    ansible_user: ansible
+    remote_user: ansible
     public_key_path: "/path/to/your/public_key.pub"  # Placeholder for the public key path
 
   tasks:
@@ -14,7 +14,7 @@
 
     - name: Add ansible user to sudo group
       user:
-        name: "{{ ansible_user }}"
+        name: "{{ remote_user }}"
         groups: sudo
         append: yes
 
@@ -22,8 +22,8 @@
       lineinfile:
         dest: /etc/sudoers
         state: present
-        regexp: "^%{{ ansible_user }} ALL=(ALL:ALL) NOPASSWD:ALL"
-        line: "%{{ ansible_user }} ALL=(ALL:ALL) NOPASSWD:ALL"
+        regexp: "^%{{ remote_user }} ALL=(ALL:ALL) NOPASSWD:ALL"
+        line: "%{{ remote_user }} ALL=(ALL:ALL) NOPASSWD:ALL"
         validate: "visudo -cf %s"
 
     - name: Update apt cache
@@ -34,14 +34,14 @@
       file:
         path: /home/{{ ansible_user }}/.ssh
         state: directory
-        owner: "{{ ansible_user }}"
-        group: "{{ ansible_user }}"
+        owner: "{{ remote_user }}"
+        group: "{{ remote_user }}"
         mode: '0700'
 
     - name: Setup authorized_keys file
       copy:
         src: "{{ public_key_path }}"
         dest: /home/{{ ansible_user }}/.ssh/authorized_keys
-        owner: "{{ ansible_user }}"
-        group: "{{ ansible_user }}"
+        owner: "{{ remote_user }}"
+        group: "{{ remote_user }}"
         mode: '0600'
