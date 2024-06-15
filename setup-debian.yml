@@ -1,0 +1,48 @@
+---
+- name: Setup Debian host for Ansible
+  hosts: all
+  become: yes
+  vars:
+    ansible_user: ansible
+    public_key_path: "/path/to/your/public_key.pub"  # Placeholder for the public key path
+
+  tasks:
+    - name: Ensure sudo is installed
+      apt:
+        name: sudo
+        state: present
+        update_cache: yes
+
+    - name: Add ansible user to sudo group
+      user:
+        name: "{{ ansible_user }}"
+        groups: sudo
+        append: yes
+
+    - name: Allow ansible user to execute sudo without password
+      lineinfile:
+        dest: /etc/sudoers
+        state: present
+        regexp: "^%{{ ansible_user }} ALL=(ALL:ALL) NOPASSWD:ALL"
+        line: "%{{ ansible_user }} ALL=(ALL:ALL) NOPASSWD:ALL"
+        validate: "visudo -cf %s"
+
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+
+    - name: Create .ssh directory
+      file:
+        path: /home/{{ ansible_user }}/.ssh
+        state: directory
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: '0700'
+
+    - name: Setup authorized_keys file
+      copy:
+        src: "{{ public_key_path }}"
+        dest: /home/{{ ansible_user }}/.ssh/authorized_keys
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: '0600'
