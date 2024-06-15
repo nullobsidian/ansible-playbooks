@@ -1,7 +1,6 @@
 ---
 - name: Setup Debian host for Ansible
   hosts: all
-  become: yes
   vars:
     ansible_user: ansible
     public_key_path: "/path/to/your/public_key.pub"  # Placeholder for the public key path
